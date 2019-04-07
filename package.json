@@ -42,7 +42,10 @@
     "superagent": "^5.0.2"
   },
   "dependencies": {
-    "@babel/polyfill": "^7.4.0"
+    "@babel/polyfill": "^7.4.0",
+    "body-parser": "^1.18.3",
+    "dotenv": "^7.0.0",
+    "express": "^4.16.4"
   },
   "eslintIgnore": [
     "dist",

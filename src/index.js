@@ -7,19 +7,30 @@ require('dotenv').config();
 
 const app = express();
 
-app.use(bodyparser.json({
-  limit: PAYLOAD_LIMIT,
-}));
-
-app.post('/users', (req, res) => {
-  if (req.headers['content-length'] === '0') {
+function checkEmptyPayload(req, res, next) {
+  if (
+    ['POST', 'PATCH', 'PUT'].includes(req.method)
+    && req.headers['content-length'] === '0'
+  ) {
     res.status(400);
     res.set('Content-Type', 'application/json');
     res.json({
       message: 'Payload should not be empty',
     });
-    return;
   }
+  next();
+}
+function checkContentTypeHeader(req, res, next) {
+  if (!req.headers['content-type']) {
+    res.status(400);
+    res.set('Content-Type', 'application/json');
+    res.json({
+      message: 'The "Content-Type" header must be set for requests with a non-empty payload',
+    });
+  }
+  next();
+}
+function checkContentTypeJSON(req, res, next) {
   if (req.headers['content-type'] !== 'application/json') {
     res.status(415);
     res.set('Content-Type', 'application/json');
@@ -27,7 +38,15 @@ app.post('/users', (req, res) => {
       message: 'The "Content-Type" header must always be "application/json"',
     });
   }
-});
+  next();
+}
+app.use(checkEmptyPayload);
+app.use(checkContentTypeHeader);
+app.use(checkContentTypeJSON);
+app.use(bodyparser.json({ limit: PAYLOAD_LIMIT }));
+
+app.post('/users', (req, res, next) => next());
+
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err && err.type === 'entity.parse.failed') {
     res.status(400);

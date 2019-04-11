@@ -20,6 +20,17 @@ function checkEmptyPayload(req, res, next) {
   }
   next();
 }
+function checkMissingField(req, res, next) {
+  const requiredField = ['email', 'password'];
+  if (!requiredField.every(field => Object.hasOwnProperty.call(req.body, field))) {
+    res.status(400);
+    res.set('Content-Type', 'application/json');
+    res.json({
+      message: 'Payload must contain at least the email and password fields',
+    });
+  }
+  next();
+}
 function checkContentTypeHeader(req, res, next) {
   if (!req.headers['content-type']) {
     res.status(400);
@@ -44,6 +55,7 @@ app.use(checkEmptyPayload);
 app.use(checkContentTypeHeader);
 app.use(checkContentTypeJSON);
 app.use(bodyparser.json({ limit: PAYLOAD_LIMIT }));
+app.post('/user', checkMissingField);
 
 app.post('/users', (req, res, next) => next());
 

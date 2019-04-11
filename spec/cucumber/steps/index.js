@@ -22,6 +22,18 @@ When(/attaches a generic (.+) payload/, function (payloadType) {
   }
 });
 
+When(/attaches an? (.+) payload which is missing the (.+) field/, function (payloadType, missingFields) {
+  const payload = {
+    email: 'e@ma.il',
+    password: 'password',
+  };
+  const fieldToDelete = missingFields.split(',').map(s => s.trim()).filter(s => s !== '');
+  fieldToDelete.forEach(field => delete payload[field]);
+  this.request
+    .send(JSON.stringify(payload))
+    .set('Content-Type', 'application/json');
+});
+
 When('sends the request', function (callback) {
   this.request
     .then((response) => {

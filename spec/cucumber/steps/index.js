@@ -70,3 +70,24 @@ Then(/contains a message property which says '(.+)'/, function (msg) {
 When(/^without a (?:'|")([\w-]+)(?:'|") header set$/, function (headerName) {
   this.request.unset(headerName);
 });
+
+When(/^attaches an? (.+) payload where the ([a-zA-Z0-9, ]+) fields? (?:is|are)(\s+not)? a ([a-zA-Z]+)$/, function (payloadType, fields, invert, type) {
+  const payload = {
+    email: 'em@il.y',
+    password: 'passworld',
+  };
+  const typeKey = type.toLowerCase();
+  const valueKey = invert ? 'not' : 'is';
+  const sampleValue = {
+    string: {
+      is: 'string',
+      not: 10,
+    },
+  };
+  fields.split(',').map(field => field.trim()).filter(s => s !== '').forEach((field) => {
+    payload[field] = sampleValue[typeKey][valueKey];
+  });
+  this.request
+    .send(JSON.stringify(payload))
+    .set('Content-Type', 'application/json');
+});

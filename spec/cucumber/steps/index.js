@@ -1,6 +1,7 @@
 import superagent from 'superagent';
 import { When, Then } from 'cucumber';
 import assert from 'assert';
+import { convertStringToArray, getValidPayload } from './utils';
 
 When(/the client creates a (POST|GET|DELETE|PUT|PATCH|OPTIONS|HEAD) request to ([/\w-:.]+)/, function (method, path) {
   this.request = superagent(method, `${process.env.SERVER_HOSTNAME}:${process.env.SERVER_PORT}${path}`);
@@ -72,10 +73,7 @@ When(/^without a (?:'|")([\w-]+)(?:'|") header set$/, function (headerName) {
 });
 
 When(/^attaches an? (.+) payload where the ([a-zA-Z0-9, ]+) fields? (?:is|are)(\s+not)? a ([a-zA-Z]+)$/, function (payloadType, fields, invert, type) {
-  const payload = {
-    email: 'em@il.y',
-    password: 'passworld',
-  };
+  const payload = getValidPayload(payloadType);
   const typeKey = type.toLowerCase();
   const valueKey = invert ? 'not' : 'is';
   const sampleValue = {
@@ -84,7 +82,8 @@ When(/^attaches an? (.+) payload where the ([a-zA-Z0-9, ]+) fields? (?:is|are)(\
       not: 10,
     },
   };
-  fields.split(',').map(field => field.trim()).filter(s => s !== '').forEach((field) => {
+  const fieldsToModify = convertStringToArray(fields);
+  fieldsToModify.forEach((field) => {
     payload[field] = sampleValue[typeKey][valueKey];
   });
   this.request
@@ -92,15 +91,12 @@ When(/^attaches an? (.+) payload where the ([a-zA-Z0-9, ]+) fields? (?:is|are)(\
     .set('Content-Type', 'application/json');
 });
 When(/^attaches an? (.+) payload where the ([a-zA-Z0-9, ]+) fields? (?:is|are) exactly (.+)$/, function (payloadType, fields, value) {
-  const payload = {
-    email: 'e@ma.il',
-    password: 'password',
-  };
-  const fieldsToModify = fields.split(',').map(s => s.trim()).filter(s => s !== '');
+  this.payload = getValidPayload(payloadType);
+  const fieldsToModify = convertStringToArray(fields);
   fieldsToModify.forEach((field) => {
-    payload[field] = value;
+    this.payload[field] = value;
   });
   this.request
-    .send(JSON.stringify(payload))
+    .send(JSON.stringify(this.payload))
     .set('Content-Type', 'application/json');
 });

@@ -6,10 +6,10 @@
   "scripts": {
     "watch": "nodemon -w src --exec yarn run serve",
     "build": " rimraf dist/ && npx babel src -d dist",
-    "serve": "yarn run build && dotenv node dist/index.js",
+    "serve": "yarn run build && dotenv -e envs/.env node dist/index.js",
     "server:debug": "node -r esm src/index",
     "fix": "eslint src --fix",
-    "test:e2e": "dotenv -e .env -e test.env cucumber-js -- spec/cucumber/features --require-module @babel/register --require spec/cucumber/features/step_definitions",
+    "test:e2e": "dotenv -e envs/test.env -e envs/.env cucumber-js -- spec/cucumber/features --require-module @babel/register --require spec/cucumber/features/step_definitions",
     "lint": "eslint src"
   },
   "repository": {

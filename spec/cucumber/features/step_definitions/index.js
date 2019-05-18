@@ -124,7 +124,7 @@ When(/attaches a valid (.+) payload/, function (payloadType) {
 Then(/^the payload object should be added to the database, grouped under the "([a-zA-Z]+)" type$/, function (type, callback) {
   this.type = type;
   client.get({
-    index: 'hobnob',
+    index: process.env.ELASTICSEARCH_INDEX,
     type,
     id: this.responsePayload,
   })
@@ -136,7 +136,7 @@ Then(/^the payload object should be added to the database, grouped under the "([
 });
 Then(/^the newly\-created user should be deleted$/, function (callback) {
   client.delete({
-    index: 'hobnob',
+    index: process.env.ELASTICSEARCH_INDEX,
     type: this.type,
     id: this.responsePayload,
   }).then((res) => {

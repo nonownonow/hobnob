@@ -7,8 +7,9 @@
     "watch": "nodemon -w src --exec yarn run serve",
     "build": " rimraf dist/ && npx babel src -d dist",
     "serve": "yarn run build && dotenv node dist/index.js",
+    "server:debug": "node -r esm src/index",
     "fix": "eslint src --fix",
-    "test:e2e": "dotenv cucumber-js -- spec/cucumber/features --require-module @babel/register --require spec/cucumber/steps",
+    "test:e2e": "dotenv -e .env -e test.env cucumber-js -- spec/cucumber/features --require-module @babel/register --require spec/cucumber/features/step_definitions",
     "lint": "eslint src"
   },
   "repository": {
@@ -45,6 +46,8 @@
     "@babel/polyfill": "^7.4.0",
     "body-parser": "^1.18.3",
     "dotenv": "^7.0.0",
+    "elasticsearch": "^16.0.0",
+    "esm": "^3.2.25",
     "express": "^4.16.4"
   },
   "eslintIgnore": [

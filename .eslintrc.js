@@ -20,7 +20,8 @@ module.exports = {
     'react',
   ],
   rules: {
-    quotes: 'off'
+    quotes: 'off',
+    'no-underscore-dangle':0
   },
 };
 

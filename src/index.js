@@ -1,11 +1,17 @@
 import '@babel/polyfill';
 import express from 'express';
 import bodyparser from 'body-parser';
+import elasticsearch from 'elasticsearch';
+
+console.log(process.env.ELASTICSEARCH_INDEX);
+
+const client = elasticsearch.Client({
+  host: `${process.env.ELASTICSEARCH_PROTOCOL}://${process.env.ELASTICSEARCH_HOSTNAME}:${process.env.ELASTICSEARCH_PORT}`,
+});
 
 const PAYLOAD_LIMIT = 1e6;
-require('dotenv').config();
-
 const app = express();
+app.use(bodyparser.json({ limit: PAYLOAD_LIMIT }));
 
 function checkEmptyPayload(req, res, next) {
   if (
@@ -31,6 +37,7 @@ function checkContentTypeHeader(req, res, next) {
   }
   next();
 }
+
 function checkContentTypeJSON(req, res, next) {
   if (req.headers['content-type'] !== 'application/json') {
     res.status(415);
@@ -41,11 +48,25 @@ function checkContentTypeJSON(req, res, next) {
   }
   next();
 }
+app.use((req, res, next) => {
+  const CLIENT_PROTOCOL = 'http';
+  const CLIENT_HOSTNAME = '127.0.0.1';
+  const CLIENT_PORT = '8200';
+  const allowedOrigins = [
+    `${CLIENT_PROTOCOL}://${CLIENT_HOSTNAME}`,
+    `${CLIENT_PROTOCOL}://${CLIENT_HOSTNAME}:${CLIENT_PORT}`,
+  ];
+  if (allowedOrigins.includes(req.headers.origin)) {
+    res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+  }
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+});
 app.use(checkEmptyPayload);
 app.use(checkContentTypeHeader);
 app.use(checkContentTypeJSON);
-app.use(bodyparser.json({ limit: PAYLOAD_LIMIT }));
-app.post('/users', (req, res, next) => {
+
+app.post('/users', (req, res) => {
   const requiredField = ['email', 'password'];
   if (!requiredField.every(field => Object.hasOwnProperty.call(req.body, field))) {
     res.status(400);
@@ -68,10 +89,25 @@ app.post('/users', (req, res, next) => {
       message: 'The email field must be a valid email',
     });
   }
-  next();
-});
+  res.status(201);
+  client.index({
+    index: 'hobnob',
+    type: 'user',
+    body: req.body,
+  })
+    .then((result) => {
+      console.log(result);
 
-app.post('/users', (req, res, next) => next());
+      res.set('Content-Type', 'text/plain');
+      res.send(result._id);
+      return result;
+    })
+    .catch(() => {
+      res.status(500);
+      res.set('Content-Type', 'application/json');
+      res.json({ message: 'Internal Server Error' });
+    });
+});
 
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err && err.type === 'entity.parse.failed') {

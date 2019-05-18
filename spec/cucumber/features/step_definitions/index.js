@@ -40,7 +40,7 @@ When(/attaches an? (.+) payload which is missing the (.+) field/, function (payl
     .set('Content-Type', 'application/json');
 });
 
-When('sends the request', function (callback) {
+When(/^sends the request$/, function (callback) {
   this.request
     .then((response) => {
       this.response = response.res;
@@ -52,7 +52,7 @@ When('sends the request', function (callback) {
     });
 });
 
-Then('our API should respond with a {int} HTTP status code', function (statusCode) {
+Then(/our API should respond with a (\d+) HTTP status code/, function (statusCode) {
   assert.equal(this.response.statusCode, statusCode);
 });
 
@@ -120,4 +120,27 @@ When(/attaches a valid (.+) payload/, function (payloadType) {
   this.request
     .send(JSON.stringify(this.payload))
     .set('Content-Type', 'application/json');
+});
+Then(/^the payload object should be added to the database, grouped under the "([a-zA-Z]+)" type$/, function (type, callback) {
+  this.type = type;
+  client.get({
+    index: 'hobnob',
+    type,
+    id: this.responsePayload,
+  })
+    .then((result) => {
+      assert.deepEqual(result._source, this.payload);
+      callback();
+    })
+    .catch(callback);
+});
+Then(/^the newly\-created user should be deleted$/, function (callback) {
+  client.delete({
+    index: 'hobnob',
+    type: this.type,
+    id: this.responsePayload,
+  }).then((res) => {
+    assert.equal(res._id, this.responsePayload);
+    callback();
+  }).catch(callback);
 });

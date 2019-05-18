@@ -91,11 +91,11 @@ app.post('/users', (req, res) => {
   }
   res.status(201);
   client.index({
-    index: 'hobnob',
+    index: process.env.ELASTICSEARCH_INDEX,
     type: 'user',
     body: req.body,
   })
-    .then((result) => {
+    .then((result) => {A{O}
       console.log(result);
 
       res.set('Content-Type', 'text/plain');

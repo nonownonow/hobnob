@@ -95,7 +95,7 @@ app.post('/users', (req, res) => {
     type: 'user',
     body: req.body,
   })
-    .then((result) => {A{O}
+    .then((result) => {
       console.log(result);
 
       res.set('Content-Type', 'text/plain');

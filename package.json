@@ -9,7 +9,7 @@
     "serve": "yarn run build && dotenv -e envs/.env node dist/index.js",
     "server:debug": "node -r esm src/index",
     "fix": "eslint src --fix",
-    "test:e2e": "dotenv -e envs/test.env -e envs/.env cucumber-js -- spec/cucumber/features --require-module @babel/register --require spec/cucumber/features/step_definitions",
+    "test:e2e": "dotenv -e envs/test.env -e envs/.env scripts/test.e2e.sh",
     "lint": "eslint src"
   },
   "repository": {

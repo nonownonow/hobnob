@@ -2,12 +2,12 @@ import '@babel/polyfill';
 import express from 'express';
 import bodyparser from 'body-parser';
 import elasticsearch from 'elasticsearch';
-import { checkContentTypeJSON } from './middlewares/check-content-type-is-json'
-import { checkContentTypeIsSet } from './middlewares/check-content-type-is-set'
-import { checkEmptyPayload } from './middlewares/check-empty-playload'
-import { errorHandler } from './middlewares/error-handler'
-
-console.log(process.env.ELASTICSEARCH_INDEX);
+import { checkContentTypeJSON } from './middlewares/check-content-type-is-json';
+import { checkContentTypeIsSet } from './middlewares/check-content-type-is-set';
+import { checkEmptyPayload } from './middlewares/check-empty-playload';
+import { errorHandler } from './middlewares/error-handler';
+import { createUser } from './handlers/users/create';
+import { injectHandlerDependencies } from './utils';
 
 const client = elasticsearch.Client({
   host: `${process.env.ELASTICSEARCH_PROTOCOL}://${process.env.ELASTICSEARCH_HOSTNAME}:${process.env.ELASTICSEARCH_PORT}`,
@@ -16,7 +16,6 @@ const client = elasticsearch.Client({
 const PAYLOAD_LIMIT = 1e6;
 const app = express();
 app.use(bodyparser.json({ limit: PAYLOAD_LIMIT }));
-
 
 
 app.use((req, res, next) => {
@@ -37,48 +36,7 @@ app.use(checkEmptyPayload);
 app.use(checkContentTypeIsSet);
 app.use(checkContentTypeJSON);
 
-app.post('/users', (req, res) => {
-  const requiredField = ['email', 'password'];
-  if (!requiredField.every(field => Object.hasOwnProperty.call(req.body, field))) {
-    res.status(400);
-    res.set('Content-Type', 'application/json');
-    res.json({
-      message: 'Payload must contain at least the email and password fields',
-    });
-  }
-  if (typeof req.body.email !== 'string' || typeof req.body.password !== 'string') {
-    res.status(400);
-    res.set('Content-Type', 'application/json');
-    res.json({
-      message: 'The email and password fields must be of type string',
-    });
-  }
-  if (!/^[\w.+]+@\w+\.\w+$/.test(req.body.email)) {
-    res.status(400);
-    res.set('Content-Type', 'application/json');
-    res.json({
-      message: 'The email field must be a valid email',
-    });
-  }
-  res.status(201);
-  client.index({
-    index: process.env.ELASTICSEARCH_INDEX,
-    type: 'user',
-    body: req.body,
-  })
-    .then((result) => {
-      console.log(result);
-
-      res.set('Content-Type', 'text/plain');
-      res.send(result._id);
-      return result;
-    })
-    .catch(() => {
-      res.status(500);
-      res.set('Content-Type', 'application/json');
-      res.json({ message: 'Internal Server Error' });
-    });
-});
+app.post('/users', injectHandlerDependencies(createUser, client));
 
 app.use(errorHandler);
 

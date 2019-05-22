@@ -1,5 +1,15 @@
+import { validate } from '../../validators/users/create';
+import ValidationError from '../../validators/errors/validationn-error';
 
 export function createUser(req, res, db) {
+  const validationResults = validate(req);
+  if (validationResults instanceof ValidationError) {
+    res.status(400);
+    res.set('Content-Type', 'application/json');
+    res.json({
+      message: validationResults.message,
+    });
+  }
   res.status(201);
   db.index({
     index: process.env.ELASTICSEARCH_INDEX,

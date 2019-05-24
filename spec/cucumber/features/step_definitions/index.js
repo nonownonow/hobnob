@@ -144,3 +144,9 @@ Then(/^the newly\-created user should be deleted$/, function (callback) {
     callback();
   }).catch(callback);
 });
+When(/^attaches (.*) as the payload$/, function (payload) {
+  this.requestPayload = JSON.parse(payload);
+  this.request
+    .send(payload)
+    .set('Content-Type', 'application/json');
+});

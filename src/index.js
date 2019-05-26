@@ -38,6 +38,7 @@ app.use(checkContentTypeJSON);
 
 app.post('/users', injectHandlerDependencies(createUser, client));
 
+// app.post('/users', (req, res) => console.log('users'));
 app.use(errorHandler);
 
 app.listen(process.env.SERVER_PORT, () => {

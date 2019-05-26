@@ -14,13 +14,13 @@ Feature: Create User
     And sends the request
     Then our API should respond with a <statusCode> HTTP status code
     And the payload of the response should be a JSON object
-    And contains a message property which says <message>
+    And contains a message property which says '<message>'
 
     Examples:
-      | payloadType | statusCode | message                                                       |
-      | empty       | 400        | 'Payload should not be empty'                                 |
-      | non-JSON    | 415        | 'The "Content-Type" header must always be "application/json"' |
-      | malformed   | 400        | 'Payload should be in JSON format'                            |
+      | payloadType | statusCode | message                                                     |
+      | empty       | 400        | Payload should not be empty                                 |
+      | non-JSON    | 415        | The "Content-Type" header must always be "application/json" |
+      | malformed   | 400        | Payload should be in JSON format                            |
 
   Scenario Outline: Bad Request Payload
     When the client creates a POST request to /users
@@ -28,12 +28,12 @@ Feature: Create User
     And sends the request
     Then our API should respond with a 400 HTTP status code
     And the payload of the response should be a JSON object
-    And contains a message property which says 'Payload must contain at least the email and password fields'
+    And contains a message property which says '<message>'
 
     Examples:
-      | missingFields |
-      | email         |
-      | password      |
+      | missingFields | message                          |
+      | email         | The '.email' field is missing    |
+      | password      | The '.password' field is missing |
 
   Scenario Outline: Request Payload with Properties of Unsupported Type
     When the client creates a POST request to /users
@@ -41,12 +41,12 @@ Feature: Create User
     And sends the request
     Then our API should respond with a 400 HTTP status code
     And the payload of the response should be a JSON object
-    And contains a message property which says 'The email and password fields must be of type string'
+    And contains a message property which says 'The '.<field>' field must be of type <type>'
 
     Examples:
-      | field    | type    |
-      | email    | string  |
-      | password | string  |
+      | field    | type   |
+      | email    | string |
+      | password | string |
 
   Scenario Outline: Request Payload with invalid email format
 
@@ -55,13 +55,13 @@ Feature: Create User
     And sends the request
     Then our API should respond with a 400 HTTP status code
     And the payload of the response should be a JSON object
-    And contains a message property which says 'The email field must be a valid email'
+    And contains a message property which says 'The '.email' field must be a valid email'
 
     Examples:
-    |email|
-    |a238juqy2  |
-    |a@1.2.3.4  |
-    |a,b,c@!!  |
+      | email     |
+      | a238juqy2 |
+      | a@1.2.3.4 |
+      | a,b,c@!!  |
 
   Scenario: Minimal Valid User
 
@@ -80,8 +80,12 @@ Feature: Create User
     And sends the request
     Then our API should respond with a 400 HTTP status code
     And the payload of the response should be a JSON object
-    And contains a message property which says 'The profile provided is invalid'
+    And contains a message property which says '<message>'
 
     Examples:
-    |payload|
-    |{"email": "e@ma.li", "password":"abc", "profile":{"foo":"boo"}}     |
+      | payload                                                                              | message                                                |
+      | {"email": "e@ma.li", "password":"abc", "profile":{"foo":"boo"}}                      | The '.profile' object dose not support the field 'foo' |
+      | {"email": "e@ma.li", "password":"abc", "profile":{"name":"Jane Doe"}}                | The '.profile.name' field must be of type object       |
+      | {"email": "e@ma.li", "password":"abc", "profile":{"name":{"first":"Jane", "a":"b"}}} | The '.profile.name' object dose not support the field 'a'   |
+      | {"email": "e@ma.li", "password":"abc", "profile":{"summary":0}}                      | The '.profile.summary' field must be of type string    |
+      | {"email": "e@ma.li", "password":"abc", "profile":{"bio":0}}                         | The '.profile.bio' field must be of type string        |

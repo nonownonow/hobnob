@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Clean the test index (if it exists)
+curl --silent -o /dev/null -X DELETE "$ELASTICSEARCH_HOSTNAME:$ELASTICSEARCH_PORT/$ELASTICSEARCH_INDEX_TEST"
 RETRY_INTERVAL=${RETRY_INTERVAL:-2}
 if lsof -i:$SERVER_PORT > /dev/null; then
   echo "Anoter process is already listening to port $SERVER_PORT"

@@ -1,9 +1,11 @@
 import superagent from 'superagent';
+import path from 'path';
 import { When, Then } from 'cucumber';
 import assert from 'assert';
 import elasticsearch from 'elasticsearch';
+import env from 'dotenv';
 import { convertStringToArray, getValidPayload } from './utils';
-
+env.config({ path: path.resolve(process.cwd(), './envs/test.env') });
 const client = new elasticsearch.Client({
   host: `${process.env.ELASTICSEARCH_PROTOCOL}://${process.env.ELASTICSEARCH_HOSTNAME}:${process.env.ELASTICSEARCH_PORT}`,
 });

@@ -3,6 +3,7 @@ module.exports = {
     browser: true,
     es6: true,
     node: true,
+    mocha: true,
   },
   extends: 'airbnb',
   globals: {
@@ -23,5 +24,14 @@ module.exports = {
     quotes: 'off',
     'no-underscore-dangle':0
   },
+  overrides: [
+    {
+      files: ["*.test.js"],
+      rules:{
+        "func-names":0,
+        "prefer-arrow-callback":0
+      }
+    }
+  ]
 };
 

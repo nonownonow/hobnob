@@ -1,5 +1,5 @@
 import { validate } from '../../validators/users/create';
-import ValidationError from '../../validators/errors/validationn-error';
+import Index from '../../validators/errors/validation-error';
 import { create } from '../../engines/users/create';
 
 export function createUser(req, res, db) {
@@ -10,7 +10,7 @@ export function createUser(req, res, db) {
     return result;
   })
     .catch((err) => {
-      if (err instanceof ValidationError) {
+      if (err instanceof Index) {
         res.status(400);
         res.set('Content-Type', 'application/json');
         res.json({

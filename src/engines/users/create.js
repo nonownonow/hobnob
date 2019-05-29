@@ -1,9 +1,9 @@
 import { validate } from '../../validators/users/create';
-import ValidationError from '../../validators/errors/validationn-error';
+import Index from '../../validators/errors/validation-error';
 
 export function create(req, db) {
   const validationResults = validate(req);
-  if (validationResults instanceof ValidationError) {
+  if (validationResults instanceof Index) {
     return Promise.reject(validationResults);
   }
   return db.index({
